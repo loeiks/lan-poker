@@ -1,0 +1,33 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+.vite/
+tsconfig.tsbuildinfo
+
+# local database
+data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# environment
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# internal tooling
+.agents/
+.claude/
+.opencode/
+skills-lock.json

@@ -1,0 +1,12 @@
+node_modules
+.git
+.vscode
+.claude
+dist
+data
+*.db
+*.db-journal
+*.db-wal
+*.tsbuildinfo
+openspec
+tests
