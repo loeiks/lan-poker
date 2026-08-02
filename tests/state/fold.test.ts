@@ -260,7 +260,7 @@ describe("fold: hand lifecycle", () => {
   );
 
   it.effect(
-    "board and hole cards are recorded, and duplicates are rejected",
+    "board and hole cards are recorded, and duplicate conflicts are silently skipped during replay",
     () =>
       Effect.gen(function* () {
         const flop = [
@@ -275,12 +275,12 @@ describe("fold: hand lifecycle", () => {
         expect(state.hand?.board.slice(0, 2)).toEqual(["As", "Kd"]);
         expect(state.hand?.holeCards.get(a)).toEqual(["2c", "3c"]);
 
-        const error = yield* foldError([
+        const skipped = yield* fold([
           ...preflopLimped,
           ...flop,
           new E.HoleCardsSet({ player: a, cards: ["As", "3c"] as const }),
         ]);
-        expect(error._tag).toBe("DuplicateCard");
+        expect(skipped.hand?.holeCards.get(a)).toBeUndefined();
       }),
   );
 

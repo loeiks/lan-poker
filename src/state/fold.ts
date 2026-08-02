@@ -401,14 +401,14 @@ const apply = (
       case "BoardCardSet": {
         const hand = yield* requireHand(state);
         const result = setBoardCard(hand, event.index, event.card);
-        if (!result.ok) return yield* result.error as FoldError;
+        if (!result.ok) return state;
         return withHand(state, result.hand);
       }
 
       case "HoleCardsSet": {
         const hand = yield* requireHand(state);
         const result = setHoleCards(hand, event.player, event.cards);
-        if (!result.ok) return yield* result.error as FoldError;
+        if (!result.ok) return state;
         return withHand(state, result.hand);
       }
 
