@@ -193,6 +193,45 @@ describe("Table: betting and fold-out settlement", () => {
         expect(secondHand.hand?.button).toBe("bob");
       }).pipe(Effect.provide(defaultLayer)),
   );
+
+  it.effect(
+    "starting a second hand with the same explicit dealer as before still works",
+    () =>
+      Effect.gen(function* () {
+        const table = yield* Table;
+        yield* table.join(admin);
+        const snap0 = yield* seatAndReady([p("alice"), p("bob"), p("carol")]);
+        let snap = yield* table.startHand(admin, snap0.seq, p("alice"));
+        expect(snap.hand?.button).toBe("alice");
+        snap = yield* table.act(p("alice"), snap.seq, { kind: "fold" });
+        snap = yield* table.act(p("bob"), snap.seq, { kind: "fold" });
+
+        snap = yield* table.ready(p("alice"), snap.seq);
+        snap = yield* table.ready(p("bob"), snap.seq);
+        snap = yield* table.ready(p("carol"), snap.seq);
+        const secondHand = yield* table.startHand(
+          admin,
+          snap.seq,
+          p("alice"),
+        );
+        expect(secondHand.hand?.button).toBe("alice");
+        expect(secondHand.hand?.players).toEqual(["alice", "bob", "carol"]);
+      }).pipe(Effect.provide(defaultLayer)),
+  );
+
+  it.effect("handsPlayed counts completed hands for the dealer UI", () =>
+    Effect.gen(function* () {
+      const table = yield* Table;
+      yield* table.join(admin);
+      const snap0 = yield* seatAndReady([p("alice"), p("bob")]);
+      expect(snap0.handsPlayed).toBe(0);
+
+      let snap = yield* table.startHand(admin, snap0.seq);
+      expect(snap.handsPlayed).toBe(0);
+      snap = yield* table.act(p("alice"), snap.seq, { kind: "fold" });
+      expect(snap.handsPlayed).toBe(1);
+    }).pipe(Effect.provide(defaultLayer)),
+  );
 });
 
 describe("Table: showdown", () => {

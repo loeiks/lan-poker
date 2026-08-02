@@ -183,26 +183,34 @@ const SeatOrderSection = ({
         <>
           <Separator />
           <div className="flex flex-col gap-2">
-            <div className="text-muted-foreground text-xs">Dealer</div>
-            <div className="flex flex-wrap gap-1">
-              {snapshot.players.map((p) => (
-                <Button
-                  key={p.name}
-                  type="button"
-                  size="sm"
-                  variant={dealer === p.name ? "default" : "secondary"}
-                  className="rounded-full"
-                  onClick={() =>
-                    setDealer((d) => (d === p.name ? undefined : p.name))
-                  }
-                >
-                  {p.name}
+            {snapshot.handsPlayed === 0 ? (
+              <>
+                <div className="text-muted-foreground text-xs">Dealer</div>
+                <div className="flex flex-wrap gap-1">
+                  {snapshot.players.map((p) => (
+                    <Button
+                      key={p.name}
+                      type="button"
+                      size="sm"
+                      variant={dealer === p.name ? "default" : "secondary"}
+                      className="rounded-full"
+                      onClick={() =>
+                        setDealer((d) => (d === p.name ? undefined : p.name))
+                      }
+                    >
+                      {p.name}
+                    </Button>
+                  ))}
+                </div>
+                <Button onClick={() => table.startHand(seq, dealer)}>
+                  Start hand
                 </Button>
-              ))}
-            </div>
-            <Button onClick={() => table.startHand(seq, dealer)}>
-              Start hand
-            </Button>
+              </>
+            ) : (
+              // After the first hand the dealer rotates on its own -- no
+              // selection needed, just go.
+              <Button onClick={() => table.startHand(seq)}>Start hand</Button>
+            )}
           </div>
         </>
       )}

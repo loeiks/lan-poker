@@ -84,6 +84,8 @@ export interface TableSnapshot {
   readonly standings: ReadonlyArray<Standing>;
   /** Winners of the last completed hand, for UI celebration. Cleared on next hand. */
   readonly lastWinners: ReadonlyArray<PlayerName> | undefined;
+  /** How many hands this table has completed, so the UI knows a dealer rotation exists. */
+  readonly handsPlayed: number;
 }
 
 const playerView = (player: PlayerState): PlayerView => ({
@@ -182,5 +184,6 @@ export const buildSnapshot = (
         : undefined,
     standings: standings(state),
     lastWinners: state.lastWinners,
+    handsPlayed: state.handsPlayed,
   };
 };

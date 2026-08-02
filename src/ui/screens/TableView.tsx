@@ -4,6 +4,7 @@ import {
   RiExchangeLine,
   RiLogoutBoxRLine,
   RiMenuLine,
+  RiRefreshLine,
   RiShieldUserLine,
 } from "@remixicon/react";
 import confetti from "canvas-confetti";
@@ -53,29 +54,47 @@ export const TableView = ({
   );
   const [errorDismissed, setErrorDismissed] = useState(false);
   const snapshot = table.snapshot;
-  if (snapshot === undefined) return null;
-
-  const seq = snapshot.seq as Seq;
   const playerName = you as PlayerName;
-  const me = snapshot.players.find((p) => p.name === playerName);
-  const hand = snapshot.hand;
-  const playing = hand !== undefined && !hand.complete;
 
   const firedConfettiRef = useRef<string | undefined>(undefined);
+  const confettiTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
   useEffect(() => {
-    const winners = snapshot.lastWinners;
+    const winners = snapshot?.lastWinners;
     if (winners === undefined) return;
     const key = winners.join(",");
     if (key === firedConfettiRef.current) return;
     firedConfettiRef.current = key;
-    if (winners.includes(playerName)) {
+    if (!winners.includes(playerName)) return;
+    // A second, delayed burst reads as a real celebration rather than a
+    // blip -- scheduled off a ref, not effect cleanup, so a later snapshot
+    // (e.g. someone else readying up) can't cancel it early.
+    const burst = () =>
       confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-    }
-  }, [snapshot.lastWinners, playerName]);
+    burst();
+    confettiTimerRef.current = setTimeout(burst, 700);
+  }, [snapshot?.lastWinners, playerName]);
+
+  useEffect(
+    () => () => {
+      if (confettiTimerRef.current !== undefined)
+        clearTimeout(confettiTimerRef.current);
+    },
+    [],
+  );
 
   useEffect(() => {
     setErrorDismissed(false);
   }, [table.lastError]);
+
+  if (snapshot === undefined) return null;
+
+  const seq = snapshot.seq as Seq;
+  const me = snapshot.players.find((p) => p.name === playerName);
+  const hand = snapshot.hand;
+  const playing = hand !== undefined && !hand.complete;
+  const spectating = playing && !hand.players.includes(playerName);
 
   return (
     <div className="bg-background flex min-h-dvh flex-col">
@@ -90,6 +109,13 @@ export const TableView = ({
           {table.status !== "open" && (
             <span className="text-muted-foreground text-xs">reconnecting…</span>
           )}
+          <Button
+            variant="ghost"
+            aria-label="Refresh"
+            onClick={() => window.location.reload()}
+          >
+            <RiRefreshLine />
+          </Button>
           <Button
             variant="ghost"
             aria-label="Menu"
@@ -115,6 +141,12 @@ export const TableView = ({
             You won this hand!
           </div>
         )}
+
+      {spectating && (
+        <div className="bg-muted text-muted-foreground mx-3 mb-2 rounded-lg px-3 py-2 text-xs font-medium">
+          Spectating this hand — you'll be dealt into the next one.
+        </div>
+      )}
 
       <PlayerAvatarRow
         players={snapshot.players}
@@ -161,14 +193,14 @@ export const TableView = ({
 
       {playing && (
         <div className="flex items-end justify-between gap-3 px-3 pb-2">
-          <HoleCards
-            cards={hand.yourHoleCards}
-            onSet={
-              hand.players.includes(playerName)
-                ? (cards) => table.setHoleCards(seq, playerName, cards)
-                : undefined
-            }
-          />
+          {spectating ? (
+            <div className="text-muted-foreground text-xs">Spectating</div>
+          ) : (
+            <HoleCards
+              cards={hand.yourHoleCards}
+              onSet={(cards) => table.setHoleCards(seq, playerName, cards)}
+            />
+          )}
           <HandSummary hand={hand} />
         </div>
       )}
@@ -181,13 +213,15 @@ export const TableView = ({
           disabledReason={
             hand.complete
               ? "Hand settled"
-              : hand.folded.includes(playerName)
-                ? "You've folded"
-                : hand.actingPlayer === undefined
-                  ? "Waiting…"
-                  : hand.actingPlayer !== playerName
-                    ? `It's ${hand.actingPlayer}'s turn, wait yours`
-                    : undefined
+              : spectating
+                ? "You're spectating this hand"
+                : hand.folded.includes(playerName)
+                  ? "You've folded"
+                  : hand.actingPlayer === undefined
+                    ? "Waiting…"
+                    : hand.actingPlayer !== playerName
+                      ? `It's ${hand.actingPlayer}'s turn, wait yours`
+                      : undefined
           }
         />
       )}
