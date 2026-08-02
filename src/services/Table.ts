@@ -29,6 +29,10 @@ import {
   postBlind,
   type ActionIntent,
 } from "~/rules/betting";
+import {
+  setBoardCard as checkBoardCard,
+  setHoleCards as checkHoleCards,
+} from "~/rules/cards";
 import { burnoutOnSettle, lossBonusOnSettle } from "~/rules/credit";
 import { canEvaluate, winnersFromCards } from "~/rules/evaluate";
 import {
@@ -540,7 +544,9 @@ const make = Effect.gen(function* () {
         Effect.gen(function* () {
           yield* checkSeq(state, seq);
           yield* requireAdmin(state, by);
-          yield* requireHand(state);
+          const hand = yield* requireHand(state);
+          const result = checkBoardCard(hand, index, card);
+          if (!result.ok) return yield* result.error;
           return [new E.BoardCardSet({ index, card })];
         }),
       ),
@@ -563,6 +569,8 @@ const make = Effect.gen(function* () {
           }
           if (!hand.players.includes(target))
             return yield* illegal("player-not-in-hand");
+          const result = checkHoleCards(hand, target, cards);
+          if (!result.ok) return yield* result.error;
           return [new E.HoleCardsSet({ player: target, cards })];
         }),
       ),
