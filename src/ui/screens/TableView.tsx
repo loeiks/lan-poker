@@ -61,13 +61,13 @@ export const TableView = ({
   const hand = snapshot.hand;
   const playing = hand !== undefined && !hand.complete;
 
-  const firedConfettiRef = useRef<ReadonlyArray<PlayerName> | undefined>(
-    undefined,
-  );
+  const firedConfettiRef = useRef<string | undefined>(undefined);
   useEffect(() => {
     const winners = snapshot.lastWinners;
-    if (winners === undefined || winners === firedConfettiRef.current) return;
-    firedConfettiRef.current = winners;
+    if (winners === undefined) return;
+    const key = winners.join(",");
+    if (key === firedConfettiRef.current) return;
+    firedConfettiRef.current = key;
     if (winners.includes(playerName)) {
       confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
     }

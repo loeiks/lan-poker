@@ -208,7 +208,16 @@ export const useTable = (name: string | undefined): UseTable => {
 
     connect();
 
+    const onVisible = () => {
+      if (document.visibilityState === "visible") {
+        wsRef.current?.close();
+        connect();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+
     return () => {
+      document.removeEventListener("visibilitychange", onVisible);
       closedByUsRef.current = true;
       if (timerRef.current !== undefined) clearTimeout(timerRef.current);
       wsRef.current?.close();
