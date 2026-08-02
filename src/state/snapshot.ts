@@ -173,11 +173,11 @@ export const buildSnapshot = (
       playerView(state.players.get(name)!),
     ),
     hand:
-      state.hand === undefined
-        ? undefined
-        : handView(state.hand, recipient, state.config.isAdmin(recipient)),
+      state.hand !== undefined && !state.hand.complete
+        ? handView(state.hand, recipient, state.config.isAdmin(recipient))
+        : undefined,
     legalActions:
-      state.hand !== undefined && actingPlayer(state.hand) === recipient
+      state.hand !== undefined && !state.hand.complete && actingPlayer(state.hand) === recipient
         ? legalActions(state.hand, state.config, balanceOf)
         : undefined,
     standings: standings(state),

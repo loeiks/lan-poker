@@ -149,7 +149,7 @@ describe("Table: betting and fold-out settlement", () => {
         expect(snap.hand?.actingPlayer).toBe("bob");
         snap = yield* table.act(p("bob"), snap.seq, { kind: "fold" });
 
-        expect(snap.hand?.complete).toBe(true);
+        expect(snap.lastWinners).toBeDefined();
         const carol = snap.players.find((pl) => pl.name === "carol");
         // carol posted the big blind (10) and wins the 15-chip pot uncontested.
         expect(carol?.balance).toBe(1000 - 10 + 15);
@@ -228,7 +228,7 @@ describe("Table: showdown", () => {
         snap = yield* table.setBoardCard(admin, snap.seq, i, card as never);
       }
 
-      expect(snap.hand?.complete).toBe(true);
+      expect(snap.lastWinners).toBeDefined();
       const alice = snap.players.find((pl) => pl.name === "alice")!;
       expect(alice.balance).toBeGreaterThan(1000);
     }).pipe(Effect.provide(defaultLayer)),
@@ -244,7 +244,7 @@ describe("Table: showdown", () => {
         const snap = yield* table.declareWinners(admin, dealt.seq, [
           { potIndex: 0, winners: [p("alice")] },
         ]);
-        expect(snap.hand?.complete).toBe(true);
+        expect(snap.lastWinners).toBeDefined();
         const alice = snap.players.find((pl) => pl.name === "alice")!;
         const bob = snap.players.find((pl) => pl.name === "bob")!;
         expect(alice.balance).toBe(1010);

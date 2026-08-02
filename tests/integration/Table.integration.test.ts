@@ -78,7 +78,7 @@ describe("Table integration: a real SQLite file", () => {
         snap = yield* table.declareWinners(admin, snap.seq, [
           { potIndex: 0, winners: [p("alice")] },
         ]);
-        expect(snap.hand?.complete).toBe(true);
+        expect(snap.lastWinners).toBeDefined();
         const alice = snap.players.find((pl) => pl.name === "alice")!;
         const bob = snap.players.find((pl) => pl.name === "bob")!;
         expect(alice.balance).toBe(1010);
@@ -143,7 +143,7 @@ describe("Table integration: a real SQLite file", () => {
           expect(snap.hand?.actingPlayer).toBe("carol");
           snap = yield* table.act(p("carol"), snap.seq, { kind: "fold" });
           snap = yield* table.act(p("alice"), snap.seq, { kind: "fold" });
-          expect(snap.hand?.complete).toBe(true);
+          expect(snap.lastWinners).toBeDefined();
           const bob = snap.players.find((pl) => pl.name === "bob")!;
           expect(bob.balance).toBeGreaterThan(1000);
         }).pipe(Effect.provide(layerFor(filename))),
