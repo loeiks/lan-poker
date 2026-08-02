@@ -12,12 +12,14 @@ import {
   actingPlayer,
   buttonPlayer,
   contributionOf,
+  handInProgress,
+  readyToPlay,
   revealedBoard,
 } from "~/domain/State";
 import { legalActions, type LegalActions } from "~/rules/betting";
 import { standings, type Standing } from "~/rules/credit";
 import { canEvaluate, evaluate } from "~/rules/evaluate";
-import { blindSeats } from "~/rules/positions";
+import { blindSeats, nextButtonIndex } from "~/rules/positions";
 import { buildPots, returnUncalled } from "~/rules/pots";
 
 // The complete, per-recipient view of the table -- no delta protocol. Other
@@ -84,8 +86,8 @@ export interface TableSnapshot {
   readonly standings: ReadonlyArray<Standing>;
   /** Winners of the last completed hand, for UI celebration. Cleared on next hand. */
   readonly lastWinners: ReadonlyArray<PlayerName> | undefined;
-  /** How many hands this table has completed, so the UI knows a dealer rotation exists. */
-  readonly handsPlayed: number;
+  /** Who `startHand` would seat the button on if the admin doesn't override it -- undefined before the table's first hand. */
+  readonly nextDealer: PlayerName | undefined;
 }
 
 const playerView = (player: PlayerState): PlayerView => ({
@@ -157,6 +159,21 @@ const handView = (
   };
 };
 
+/** Who `startHand` would pick as dealer right now if left to auto-rotate. */
+const nextDealerPreview = (state: TableState): PlayerName | undefined => {
+  if (handInProgress(state) || state.lastButton === undefined) {
+    return undefined;
+  }
+  const participants = readyToPlay(state).map((p) => p.name);
+  if (participants.length === 0) return undefined;
+  const index = nextButtonIndex(
+    participants,
+    state.seatOrder,
+    state.lastButton,
+  );
+  return participants[index];
+};
+
 export const buildSnapshot = (
   state: TableState,
   recipient: PlayerName,
@@ -179,11 +196,13 @@ export const buildSnapshot = (
         ? handView(state.hand, recipient, state.config.isAdmin(recipient))
         : undefined,
     legalActions:
-      state.hand !== undefined && !state.hand.complete && actingPlayer(state.hand) === recipient
+      state.hand !== undefined &&
+      !state.hand.complete &&
+      actingPlayer(state.hand) === recipient
         ? legalActions(state.hand, state.config, balanceOf)
         : undefined,
     standings: standings(state),
     lastWinners: state.lastWinners,
-    handsPlayed: state.handsPlayed,
+    nextDealer: nextDealerPreview(state),
   };
 };

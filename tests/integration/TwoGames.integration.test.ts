@@ -8,10 +8,10 @@ import { beforeEach, vi } from "vitest";
 
 import * as Chips from "~/domain/Chips";
 import type { PlayerName } from "~/domain/Ids";
-import type { TableSnapshot } from "~/state/snapshot";
 import { AppConfig } from "~/services/AppConfig";
 import { EventStore } from "~/services/EventStore";
 import { Table, type TableService } from "~/services/Table";
+import type { TableSnapshot } from "~/state/snapshot";
 
 const p = (name: string) => name as PlayerName;
 const admin = p("admin");
@@ -94,9 +94,7 @@ describe("two consecutive games", () => {
           expect(snap.lastWinners).toContain("alice");
           expect(snap.hand).toBeUndefined();
 
-          const aliceAfter1 = snap.players.find(
-            (pl) => pl.name === "alice",
-          )!;
+          const aliceAfter1 = snap.players.find((pl) => pl.name === "alice")!;
           expect(aliceAfter1.balance).toBeGreaterThan(1000);
 
           // ---- 5th player joins between games ----

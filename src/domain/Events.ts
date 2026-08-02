@@ -208,6 +208,15 @@ export class SeatsReordered extends Schema.TaggedClass<SeatsReordered>()(
   },
 ) {}
 
+export class HandAborted extends Schema.TaggedClass<HandAborted>()(
+  "HandAborted",
+  {
+    handId: HandId,
+    /** Everything each player had committed to the pot so far, returned. */
+    refunds: Schema.Array(Schema.Struct({ player: PlayerName, amount: Chips })),
+  },
+) {}
+
 export const TableEvent = Schema.Union([
   TableCreated,
   PlayerJoined,
@@ -230,6 +239,7 @@ export const TableEvent = Schema.Union([
   CreditClaimed,
   LossBonusGranted,
   SeatsReordered,
+  HandAborted,
 ]);
 export type TableEvent = typeof TableEvent.Type;
 

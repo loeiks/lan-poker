@@ -63,9 +63,7 @@ const PlayerAvatar = ({
       {player.balance}
     </div>
     {bet !== undefined && bet > 0 && (
-      <Badge variant="secondary" className="tabular rounded-full">
-        {bet}
-      </Badge>
+      <Badge className="tabular rounded-full">{bet}</Badge>
     )}
   </div>
 );
@@ -85,9 +83,14 @@ export const PlayerAvatarRow = ({
 
   const winners = lastWinners !== undefined ? new Set(lastWinners) : undefined;
 
+  // `seatOrder` runs clockwise (action moves to increasing index); mirror
+  // the row so that turn order reads right-to-left on screen instead of
+  // left-to-right.
+  const displayOrder = [...players].reverse();
+
   return (
     <div className="flex flex-wrap justify-center gap-3 px-2 py-3">
-      {players.map((player) => (
+      {displayOrder.map((player) => (
         <PlayerAvatar
           key={player.name}
           player={player}

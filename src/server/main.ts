@@ -134,6 +134,10 @@ const runClientMessage = (
       return table.finishSession(player, message.seq);
     case "ReorderSeats":
       return table.reorderSeats(player, message.seq, message.order);
+    case "AbortHand":
+      return table.abortHand(player, message.seq);
+    case "WipeEverything":
+      return table.wipeAll(player, message.seq);
   }
 };
 

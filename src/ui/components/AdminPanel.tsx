@@ -90,7 +90,9 @@ const SeatOrderSection = ({
   readonly table: UseTable;
 }) => {
   const seq = snapshot.seq as Seq;
-  const [dealer, setDealer] = useState<PlayerName | undefined>(undefined);
+  const [dealer, setDealer] = useState<PlayerName | undefined>(
+    snapshot.nextDealer,
+  );
   const [order, setOrder] = useState<ReadonlyArray<PlayerName>>([]);
   const [dragging, setDragging] = useState<number | undefined>(undefined);
   const [dragY, setDragY] = useState(0);
@@ -101,6 +103,13 @@ const SeatOrderSection = ({
   useEffect(() => {
     setOrder(snapshot.players.map((p) => p.name));
   }, [snapshot.players]);
+
+  // Pre-select whoever auto-rotation would pick -- admin can still tap a
+  // different player before starting. Stays undefined (blank) for the very
+  // first hand, when there's no rotation to preview yet.
+  useEffect(() => {
+    setDealer(snapshot.nextDealer);
+  }, [snapshot.nextDealer]);
 
   const commit = (o: ReadonlyArray<PlayerName>) => {
     table.reorderSeats(seq, o);
@@ -183,34 +192,26 @@ const SeatOrderSection = ({
         <>
           <Separator />
           <div className="flex flex-col gap-2">
-            {snapshot.handsPlayed === 0 ? (
-              <>
-                <div className="text-muted-foreground text-xs">Dealer</div>
-                <div className="flex flex-wrap gap-1">
-                  {snapshot.players.map((p) => (
-                    <Button
-                      key={p.name}
-                      type="button"
-                      size="sm"
-                      variant={dealer === p.name ? "default" : "secondary"}
-                      className="rounded-full"
-                      onClick={() =>
-                        setDealer((d) => (d === p.name ? undefined : p.name))
-                      }
-                    >
-                      {p.name}
-                    </Button>
-                  ))}
-                </div>
-                <Button onClick={() => table.startHand(seq, dealer)}>
-                  Start hand
+            <div className="text-muted-foreground text-xs">Dealer</div>
+            <div className="flex flex-wrap gap-1">
+              {snapshot.players.map((p) => (
+                <Button
+                  key={p.name}
+                  type="button"
+                  size="sm"
+                  variant={dealer === p.name ? "default" : "secondary"}
+                  className="rounded-full"
+                  onClick={() =>
+                    setDealer((d) => (d === p.name ? undefined : p.name))
+                  }
+                >
+                  {p.name}
                 </Button>
-              </>
-            ) : (
-              // After the first hand the dealer rotates on its own -- no
-              // selection needed, just go.
-              <Button onClick={() => table.startHand(seq)}>Start hand</Button>
-            )}
+              ))}
+            </div>
+            <Button onClick={() => table.startHand(seq, dealer)}>
+              Start hand
+            </Button>
           </div>
         </>
       )}
@@ -335,9 +336,44 @@ export const AdminPanel = ({
         ))}
       </div>
 
+      {hand !== undefined && (
+        <>
+          <Separator />
+          <Button
+            variant="outline"
+            className="text-destructive"
+            onClick={() => {
+              if (
+                window.confirm(
+                  "Discard the hand in progress? Every bet placed this hand is refunded and everyone returns to ready-up.",
+                )
+              ) {
+                table.abortHand(seq);
+              }
+            }}
+          >
+            Discard current hand
+          </Button>
+        </>
+      )}
+
       <Separator />
       <Button variant="destructive" onClick={() => table.finishSession(seq)}>
         Finish session
+      </Button>
+      <Button
+        variant="destructive"
+        onClick={() => {
+          if (
+            window.confirm(
+              "Wipe EVERYTHING? Every player, balance, and hand from this table's history is deleted permanently. This cannot be undone.",
+            )
+          ) {
+            table.wipeEverything(seq);
+          }
+        }}
+      >
+        Wipe everything
       </Button>
     </div>
   );

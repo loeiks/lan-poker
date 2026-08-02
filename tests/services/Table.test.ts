@@ -209,27 +209,89 @@ describe("Table: betting and fold-out settlement", () => {
         snap = yield* table.ready(p("alice"), snap.seq);
         snap = yield* table.ready(p("bob"), snap.seq);
         snap = yield* table.ready(p("carol"), snap.seq);
-        const secondHand = yield* table.startHand(
-          admin,
-          snap.seq,
-          p("alice"),
-        );
+        const secondHand = yield* table.startHand(admin, snap.seq, p("alice"));
         expect(secondHand.hand?.button).toBe("alice");
         expect(secondHand.hand?.players).toEqual(["alice", "bob", "carol"]);
       }).pipe(Effect.provide(defaultLayer)),
   );
 
-  it.effect("handsPlayed counts completed hands for the dealer UI", () =>
+  it.effect(
+    "nextDealer previews auto-rotation once a hand has been played, but not before",
+    () =>
+      Effect.gen(function* () {
+        const table = yield* Table;
+        yield* table.join(admin);
+        const snap0 = yield* seatAndReady([p("alice"), p("bob"), p("carol")]);
+        expect(snap0.nextDealer).toBeUndefined();
+
+        let snap = yield* table.startHand(admin, snap0.seq, p("alice"));
+        snap = yield* table.act(p("alice"), snap.seq, { kind: "fold" });
+        snap = yield* table.act(p("bob"), snap.seq, { kind: "fold" });
+
+        snap = yield* table.ready(p("alice"), snap.seq);
+        snap = yield* table.ready(p("bob"), snap.seq);
+        snap = yield* table.ready(p("carol"), snap.seq);
+        // Button was alice (seat 0); auto-rotation previews bob next.
+        expect(snap.nextDealer).toBe("bob");
+
+        const secondHand = yield* table.startHand(admin, snap.seq);
+        expect(secondHand.hand?.button).toBe("bob");
+      }).pipe(Effect.provide(defaultLayer)),
+  );
+
+  it.effect(
+    "abortHand refunds every contribution and returns to ready-up without counting the hand",
+    () =>
+      Effect.gen(function* () {
+        const table = yield* Table;
+        yield* table.join(admin);
+        const snap0 = yield* seatAndReady([p("alice"), p("bob"), p("carol")]);
+        // 3-handed: alice (button) acts first preflop, then bob (SB), then carol (BB).
+        let snap = yield* table.startHand(admin, snap0.seq, p("alice"));
+        snap = yield* table.act(p("alice"), snap.seq, { kind: "call" });
+        snap = yield* table.act(p("bob"), snap.seq, { kind: "call" });
+        snap = yield* table.act(p("carol"), snap.seq, { kind: "check" });
+
+        const before = new Map(snap.players.map((pl) => [pl.name, pl]));
+
+        snap = yield* table.abortHand(admin, snap.seq);
+
+        expect(snap.hand).toBeUndefined();
+        for (const player of snap.players) {
+          expect(player.balance).toBe(1000);
+          expect(player.ready).toBe(false);
+        }
+        // Refunded balances should exceed the mid-hand snapshot for anyone
+        // who had chips in the pot.
+        expect(before.get(p("alice"))!.balance).toBeLessThan(1000);
+
+        // Doesn't count as a played hand: button rotation is unaffected.
+        snap = yield* table.ready(p("alice"), snap.seq);
+        snap = yield* table.ready(p("bob"), snap.seq);
+        snap = yield* table.ready(p("carol"), snap.seq);
+        expect(snap.nextDealer).toBeUndefined();
+        const nextHand = yield* table.startHand(admin, snap.seq, p("bob"));
+        expect(nextHand.hand?.button).toBe("bob");
+      }).pipe(Effect.provide(defaultLayer)),
+  );
+
+  it.effect("wipeAll clears every player and hand history", () =>
     Effect.gen(function* () {
       const table = yield* Table;
       yield* table.join(admin);
       const snap0 = yield* seatAndReady([p("alice"), p("bob")]);
-      expect(snap0.handsPlayed).toBe(0);
-
       let snap = yield* table.startHand(admin, snap0.seq);
-      expect(snap.handsPlayed).toBe(0);
       snap = yield* table.act(p("alice"), snap.seq, { kind: "fold" });
-      expect(snap.handsPlayed).toBe(1);
+
+      const wiped = yield* table.wipeAll(admin, snap.seq);
+      expect(wiped.players).toEqual([]);
+      expect(wiped.seatOrder).toEqual([]);
+      expect(wiped.hand).toBeUndefined();
+      expect(wiped.lastWinners).toBeUndefined();
+
+      // The table is usable again, exactly like a fresh install.
+      const rejoined = yield* table.join(admin);
+      expect(rejoined.players.map((pl) => pl.name)).toEqual(["admin"]);
     }).pipe(Effect.provide(defaultLayer)),
   );
 });

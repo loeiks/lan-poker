@@ -103,6 +103,15 @@ export class ReorderSeats extends Schema.TaggedClass<ReorderSeats>()(
   },
 ) {}
 
+export class AbortHand extends Schema.TaggedClass<AbortHand>()("AbortHand", {
+  seq: Seq,
+}) {}
+
+export class WipeEverything extends Schema.TaggedClass<WipeEverything>()(
+  "WipeEverything",
+  { seq: Seq },
+) {}
+
 export const ClientMessage = Schema.Union([
   Ready,
   Unready,
@@ -117,6 +126,8 @@ export const ClientMessage = Schema.Union([
   ClaimCredit,
   FinishSession,
   ReorderSeats,
+  AbortHand,
+  WipeEverything,
 ]);
 export type ClientMessage = typeof ClientMessage.Type;
 

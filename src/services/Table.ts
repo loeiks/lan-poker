@@ -19,6 +19,7 @@ import type { HandId, PlayerName, Seq } from "~/domain/Ids";
 import type { HandState, PlayerState, TableState } from "~/domain/State";
 import {
   activePlayers,
+  contributionOf,
   handInProgress,
   readyToPlay,
   revealedBoard,
@@ -51,6 +52,7 @@ import { EventStore } from "~/services/EventStore";
 import {
   applyEvent,
   foldEvents,
+  initialState,
   MIN_PLAYERS_PER_HAND,
   type FoldError,
 } from "~/state/fold";
@@ -145,6 +147,18 @@ export interface TableService {
   ) => Effect.Effect<TableSnapshot, TableIntentError>;
 
   readonly finishSession: (
+    by: PlayerName,
+    seq: Seq,
+  ) => Effect.Effect<TableSnapshot, TableIntentError>;
+
+  /** Discards the hand in progress: refunds every contribution and returns to the ready-up screen. Doesn't count as a played hand. */
+  readonly abortHand: (
+    by: PlayerName,
+    seq: Seq,
+  ) => Effect.Effect<TableSnapshot, TableIntentError>;
+
+  /** Erases every event and player, leaving a table as blank as a fresh install. */
+  readonly wipeAll: (
     by: PlayerName,
     seq: Seq,
   ) => Effect.Effect<TableSnapshot, TableIntentError>;
@@ -745,6 +759,39 @@ const make = Effect.gen(function* () {
       (state) => buildSnapshot(state, by),
     );
 
+  const abortHand = (by: PlayerName, seq: Seq) =>
+    Effect.map(
+      dispatch((state) =>
+        Effect.gen(function* () {
+          yield* checkSeq(state, seq);
+          yield* requireAdmin(state, by);
+          const hand = yield* requireHand(state);
+          const refunds = hand.players.map((player) => ({
+            player,
+            amount: contributionOf(hand, player),
+          }));
+          return [new E.HandAborted({ handId: hand.id as HandId, refunds })];
+        }),
+      ),
+      (state) => buildSnapshot(state, by),
+    );
+
+  const wipeAll = (by: PlayerName, seq: Seq) =>
+    gate.withPermits(1)(
+      Effect.gen(function* () {
+        const state = yield* Ref.get(stateRef);
+        yield* checkSeq(state, seq);
+        yield* requireAdmin(state, by);
+        yield* store.wipe.pipe(Effect.orDie);
+        const stored = yield* store
+          .append(new E.TableCreated({ tableId: config.id }))
+          .pipe(Effect.orDie);
+        const fresh = yield* applyEvent(initialState(config), stored);
+        yield* Ref.set(stateRef, fresh);
+        return buildSnapshot(fresh, by);
+      }),
+    );
+
   const reorderSeats = (
     by: PlayerName,
     seq: Seq,
@@ -788,6 +835,8 @@ const make = Effect.gen(function* () {
     transfer,
     claimCredit,
     finishSession,
+    abortHand,
+    wipeAll,
     reorderSeats,
   };
 });

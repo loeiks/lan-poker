@@ -38,14 +38,14 @@ docker run -p 1818:1818 -v lan-poker-data:/app/data \
   lan-poker
 ```
 
-| Variable           | Default                  | Example             | Description                                   |
-| ------------------ | ------------------------ | ------------------- | --------------------------------------------- |
-| `TABLE_NAME`       | random (e.g. `quiet-river`) | `"Friday Night"`  | Display name                                  |
-| `TABLE_MIN`        | `10`                     | `20`                | Minimum bet                                   |
-| `TABLE_MODE`       | `BURNOUT_CREDIT`         | `LOSS_BONUS`        | `BURNOUT_CREDIT`, `LOSS_BONUS`, or `DISABLED` |
-| `STARTING_BALANCE` | `70 × TABLE_MIN`         | `1400`              | Starting chips per player                     |
-| `ADMIN_NAME`       | _(none)_                 | `ali`               | Player that gets admin controls               |
-| `DB_FILENAME`      | `./data/table.sqlite`    | `/app/data/fri.sqlite` | SQLite database path                        |
+| Variable           | Default                     | Example                | Description                                   |
+| ------------------ | --------------------------- | ---------------------- | --------------------------------------------- |
+| `TABLE_NAME`       | random (e.g. `quiet-river`) | `"Friday Night"`       | Display name                                  |
+| `TABLE_MIN`        | `10`                        | `20`                   | Minimum bet                                   |
+| `TABLE_MODE`       | `BURNOUT_CREDIT`            | `LOSS_BONUS`           | `BURNOUT_CREDIT`, `LOSS_BONUS`, or `DISABLED` |
+| `STARTING_BALANCE` | `70 × TABLE_MIN`            | `1400`                 | Starting chips per player                     |
+| `ADMIN_NAME`       | _(none)_                    | `ali`                  | Player that gets admin controls               |
+| `DB_FILENAME`      | `./data/table.sqlite`       | `/app/data/fri.sqlite` | SQLite database path                          |
 
 All variables are optional. The table is fully playable on defaults.
 

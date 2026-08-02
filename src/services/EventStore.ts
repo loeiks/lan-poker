@@ -29,6 +29,8 @@ export interface EventStoreService {
   readonly ensurePlayer: (
     name: PlayerName,
   ) => Effect.Effect<{ readonly created: boolean }, SqlError>;
+  /** Erase every event and known identity. The table id itself survives. */
+  readonly wipe: Effect.Effect<void, SqlError>;
 }
 
 export class EventStore extends Context.Service<
@@ -126,7 +128,12 @@ const make = Effect.gen(function* () {
     return { created: true };
   });
 
-  return { append, readAll, tableId, ensurePlayer };
+  const wipe = Effect.gen(function* () {
+    yield* sql`DELETE FROM events`;
+    yield* sql`DELETE FROM players`;
+  }).pipe(Effect.withSpan("EventStore.wipe"));
+
+  return { append, readAll, tableId, ensurePlayer, wipe };
 });
 
 const makeMemory = (): EventStoreService => {
@@ -157,5 +164,11 @@ const makeMemory = (): EventStoreService => {
       return { created: true };
     });
 
-  return { append, readAll, tableId, ensurePlayer };
+  const wipe = Effect.sync(() => {
+    events.length = 0;
+    players.clear();
+    seq = 0;
+  });
+
+  return { append, readAll, tableId, ensurePlayer, wipe };
 };

@@ -526,6 +526,29 @@ const apply = (
         }));
       }
 
+      case "HandAborted": {
+        const hand = yield* requireHand(state);
+        if (hand.id !== event.handId) {
+          return yield* corrupt(
+            seq,
+            event,
+            `aborting ${event.handId} while ${hand.id} is in progress`,
+          );
+        }
+        let next = state;
+        for (const { player, amount } of event.refunds) {
+          if (amount > 0) next = credit(next, player, amount);
+        }
+        // Unlike settlement, this hand never really happened: no spend
+        // history, no credit/burnout ticking, no button or winner carried
+        // forward. Everyone just goes back to the ready-up screen.
+        return {
+          ...withEveryPlayer(next, (p) => ({ ...p, ready: false })),
+          hand: undefined,
+          lastWinners: undefined,
+        };
+      }
+
       case "LossBonusGranted": {
         yield* requirePlayer(state, event.player);
         // A bonus is credit too, so it lands on the score the same way.

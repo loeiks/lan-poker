@@ -83,7 +83,9 @@ type OutgoingAction =
       readonly _tag: "ReorderSeats";
       readonly seq: Seq;
       readonly order: ReadonlyArray<PlayerName>;
-    };
+    }
+  | { readonly _tag: "AbortHand"; readonly seq: Seq }
+  | { readonly _tag: "WipeEverything"; readonly seq: Seq };
 
 type WireIntent =
   | { readonly _tag: "check" }
@@ -141,6 +143,8 @@ export interface UseTable {
   readonly claimCredit: (seq: Seq) => void;
   readonly finishSession: (seq: Seq) => void;
   readonly reorderSeats: (seq: Seq, order: ReadonlyArray<PlayerName>) => void;
+  readonly abortHand: (seq: Seq) => void;
+  readonly wipeEverything: (seq: Seq) => void;
 }
 
 // Owns the single WebSocket connection to `/ws`. Every inbound snapshot
@@ -257,5 +261,7 @@ export const useTable = (name: string | undefined): UseTable => {
     claimCredit: (seq) => send({ _tag: "ClaimCredit", seq }),
     finishSession: (seq) => send({ _tag: "FinishSession", seq }),
     reorderSeats: (seq, order) => send({ _tag: "ReorderSeats", seq, order }),
+    abortHand: (seq) => send({ _tag: "AbortHand", seq }),
+    wipeEverything: (seq) => send({ _tag: "WipeEverything", seq }),
   };
 };
