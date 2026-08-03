@@ -4,7 +4,7 @@ import {
   Outlet,
   Scripts,
 } from "@tanstack/react-router";
-import { getCookie } from "@tanstack/react-start/server";
+import { createServerFn } from "@tanstack/react-start";
 import type { ReactNode } from "react";
 import { createContext, useContext, useState } from "react";
 
@@ -58,9 +58,17 @@ export function useTableContext(): TableContext {
   return ctx;
 }
 
+const getPlayerNameFromCookie = createServerFn({ method: "GET" }).handler(
+  async () => {
+    const { getCookie } = await import("@tanstack/react-start/server");
+    return getCookie(NAME_KEY);
+  },
+);
+
 export const Route = createRootRoute({
-  loader: () => {
-    return { name: getCookie(NAME_KEY) };
+  loader: async () => {
+    const name = await getPlayerNameFromCookie();
+    return { name };
   },
   head: () => ({
     meta: [
