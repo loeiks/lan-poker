@@ -136,11 +136,18 @@ async function getHandler() {
 
 const handler = await getHandler();
 
+const CLIENT_DIR = process.env.CLIENT_DIR ?? "./dist/client";
+
+const serveClientAsset = async (pathname: string): Promise<Response | null> => {
+  const file = Bun.file(`${CLIENT_DIR}${pathname}`);
+  return (await file.exists()) ? new Response(file) : null;
+};
+
 const PORT = Number(process.env.PORT ?? 1818);
 
 const server = Bun.serve<SocketData>({
   port: PORT,
-  fetch(req, bunServer) {
+  async fetch(req, bunServer) {
     const url = new URL(req.url);
     if (url.pathname === "/ws") {
       const player = playerNameFromRequest(req);
@@ -151,6 +158,11 @@ const server = Bun.serve<SocketData>({
         data: { player, connectionId: undefined },
       });
       return upgraded ? undefined : new Response(null, { status: 400 });
+    }
+
+    if (url.pathname.startsWith("/assets/")) {
+      const asset = await serveClientAsset(url.pathname);
+      if (asset) return asset;
     }
 
     if (handler) return handler(req);

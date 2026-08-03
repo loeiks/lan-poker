@@ -4,6 +4,13 @@ node_modules
 .claude
 .opencode
 .vscode
+.tanstack
+.mcp.json
+AGENTS.md
+README.md
+skills-lock.json
+components.json
+vitest.config.ts
 dist
 data
 db
