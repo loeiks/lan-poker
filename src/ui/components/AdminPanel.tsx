@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-
 import { RiDraggable } from "@remixicon/react";
+import { useEffect, useRef, useState } from "react";
 
 import type { Card } from "~/domain/Card";
 import type { PlayerName, Seq } from "~/domain/Ids";

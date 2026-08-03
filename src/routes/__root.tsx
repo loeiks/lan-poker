@@ -1,11 +1,11 @@
 import {
+  createRootRoute,
   HeadContent,
   Outlet,
   Scripts,
-  createRootRoute,
 } from "@tanstack/react-router";
-import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
+import { createContext, useContext, useState } from "react";
 
 import type { Seq } from "~/domain/Ids";
 import type { UseTable } from "~/ui/hooks/useTable";

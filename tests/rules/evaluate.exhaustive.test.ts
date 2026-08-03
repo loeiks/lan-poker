@@ -1,7 +1,6 @@
 import { describe, expect, it } from "@effect/vitest";
-
-import { DECK } from "~/domain/Card";
 import type { Card } from "~/domain/Card";
+import { DECK } from "~/domain/Card";
 import { Category, evaluate } from "~/rules/evaluate";
 
 /**

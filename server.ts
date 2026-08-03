@@ -1,13 +1,13 @@
 import { Cause, Effect, Exit, Layer, ManagedRuntime, Result } from "effect";
-import { normalizePlayerName } from "~/domain/Ids";
 import type { PlayerName } from "~/domain/Ids";
+import { normalizePlayerName } from "~/domain/Ids";
 import type { ActionIntent } from "~/rules/betting";
+import type { ClientMessage } from "~/server/Messages";
 import {
   decodeClientMessage,
   encodeServerMessage,
   errorMessage,
 } from "~/server/Messages";
-import type { ClientMessage } from "~/server/Messages";
 import { AppConfig } from "~/services/AppConfig";
 import { Broadcast } from "~/services/Broadcast";
 import { EventStore } from "~/services/EventStore";

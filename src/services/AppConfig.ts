@@ -9,8 +9,8 @@ import {
 } from "effect";
 
 import { Chips } from "~/domain/Chips";
-import { describePlayerNameProblem, normalizePlayerName } from "~/domain/Ids";
 import type { PlayerName, TableId } from "~/domain/Ids";
+import { describePlayerNameProblem, normalizePlayerName } from "~/domain/Ids";
 import { CreditMode, HOUSE_RULES, TableConfig } from "~/domain/TableConfig";
 
 // Env vars validated to a `TableConfig` at startup, so a typo'd TABLE_MODE

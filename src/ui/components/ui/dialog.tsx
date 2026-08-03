@@ -1,7 +1,6 @@
+import { RiCloseLine } from "@remixicon/react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import type * as React from "react";
-
-import { RiCloseLine } from "@remixicon/react";
 import { Button } from "~/ui/components/ui/button";
 import { cn } from "~/ui/lib/utils";
 

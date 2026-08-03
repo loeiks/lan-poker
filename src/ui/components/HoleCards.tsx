@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-
 import { RiEyeLine, RiEyeOffLine } from "@remixicon/react";
+import { useEffect, useRef, useState } from "react";
 
 import type { Card } from "~/domain/Card";
 import { CardPickerDialog } from "~/ui/components/CardPickerDialog";

@@ -1,10 +1,9 @@
 import { Database } from "bun:sqlite";
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
+import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/bun-sqlite";
 import { migrate } from "drizzle-orm/bun-sqlite/migrator";
-
-import { eq } from "drizzle-orm";
 import { Clock, Context, Effect, Layer, Schema } from "effect";
 
 import * as schema from "~/db/schema";

@@ -42,21 +42,21 @@ import {
   randomButtonIndex,
 } from "~/rules/positions";
 import {
-  type PotAward,
   buildPots,
+  type PotAward,
   returnUncalled,
   splitPot,
 } from "~/rules/pots";
 import { AppConfig } from "~/services/AppConfig";
 import { EventStore } from "~/services/EventStore";
 import {
-  type FoldError,
-  MIN_PLAYERS_PER_HAND,
   applyEvent,
+  type FoldError,
   foldEvents,
   initialState,
+  MIN_PLAYERS_PER_HAND,
 } from "~/state/fold";
-import { type TableSnapshot, buildSnapshot } from "~/state/snapshot";
+import { buildSnapshot, type TableSnapshot } from "~/state/snapshot";
 
 /**
  * Client intents → events (appended durably before notifying anyone) →

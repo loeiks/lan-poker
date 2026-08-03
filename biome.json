@@ -1,12 +1,12 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.6/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
     "useIgnoreFile": true
   },
   "files": {
-    "ignore": ["src/routeTree.gen.ts"]
+    "includes": ["**", "!**/src/routeTree.gen.ts"]
   },
   "formatter": {
     "indentStyle": "space",
@@ -15,7 +15,7 @@
   },
   "linter": {
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "complexity": {
         "useOptionalChain": "off"
       },
@@ -29,11 +29,15 @@
         "noArrayIndexKey": "off"
       },
       "a11y": {
+        "noStaticElementInteractions": "off",
         "useKeyWithClickEvents": "off"
       }
     }
   },
-  "organizeImports": {
-    "enabled": true
-  }
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } }
 }

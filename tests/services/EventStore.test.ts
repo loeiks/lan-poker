@@ -1,8 +1,7 @@
+import { Database } from "bun:sqlite";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-
-import { Database } from "bun:sqlite";
 import { describe, expect, it } from "@effect/vitest";
 import { Effect, type Layer } from "effect";
 

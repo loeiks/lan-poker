@@ -1,5 +1,3 @@
-import { useEffect, useRef, useState } from "react";
-
 import {
   RiExchangeLine,
   RiLogoutBoxRLine,
@@ -8,6 +6,7 @@ import {
   RiShieldUserLine,
 } from "@remixicon/react";
 import confetti from "canvas-confetti";
+import { useEffect, useRef, useState } from "react";
 
 import type { Card } from "~/domain/Card";
 import type { PlayerName, Seq } from "~/domain/Ids";

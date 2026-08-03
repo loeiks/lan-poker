@@ -19,7 +19,6 @@
     "incremental": true,
     "sourceMap": true,
     "skipLibCheck": true,
-    "baseUrl": ".",
     "paths": {
       "~/*": ["./src/*"]
     },
