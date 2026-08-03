@@ -30,4 +30,4 @@ ENV DB_FILENAME=/app/db/table.sqlite
 ENV PORT=1818
 EXPOSE 1818
 
-CMD ["bun", "run", "server.ts"]
+CMD ["sh", "-c", "bunx drizzle-kit migrate && bun run server.ts"]

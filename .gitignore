@@ -27,8 +27,13 @@ Thumbs.db
 *.swp
 *.swo
 
-# internal tooling
+# OpenSpec (don't track)
+openspec/
+
+# Internal tooling — allow settings/skills/commands, ignore dependencies
 .agents/
-.claude/
-.opencode/
+.claude/*/
+.opencode/node_modules/
+.opencode/package.json
+.opencode/package-lock.json
 skills-lock.json
