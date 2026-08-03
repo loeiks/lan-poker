@@ -129,13 +129,8 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    font-family:
-      ui-sans-serif,
-      system-ui,
-      -apple-system,
-      "SF Pro Text",
-      "Segoe UI",
-      sans-serif;
+    font-family: ui-sans-serif, system-ui, -apple-system, "SF Pro Text",
+      "Segoe UI", sans-serif;
     font-feature-settings: "tnum" 1;
     -webkit-font-smoothing: antialiased;
     @apply bg-background text-foreground;

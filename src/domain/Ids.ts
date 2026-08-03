@@ -17,7 +17,10 @@ export type PlayerName = typeof PlayerName.Type;
 
 /** Why a raw string could not become a `PlayerName`. */
 export type PlayerNameProblem =
-  "empty" | "not-a-single-word" | "too-long" | "unsupported-characters";
+  | "empty"
+  | "not-a-single-word"
+  | "too-long"
+  | "unsupported-characters";
 
 /**
  * Normalize raw player input, or explain why it cannot be a name.

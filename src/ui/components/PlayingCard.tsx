@@ -1,10 +1,10 @@
 import {
+  type Card,
   displayRank,
   isRedSuit,
   rankOf,
   suitOf,
   suitSymbol,
-  type Card,
 } from "~/domain/Card";
 import { cn } from "~/ui/lib/utils";
 

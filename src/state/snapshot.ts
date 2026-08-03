@@ -16,8 +16,8 @@ import {
   readyToPlay,
   revealedBoard,
 } from "~/domain/State";
-import { legalActions, type LegalActions } from "~/rules/betting";
-import { standings, type Standing } from "~/rules/credit";
+import { type LegalActions, legalActions } from "~/rules/betting";
+import { type Standing, standings } from "~/rules/credit";
 import { canEvaluate, evaluate } from "~/rules/evaluate";
 import { blindSeats, nextButtonIndex } from "~/rules/positions";
 import { buildPots, returnUncalled } from "~/rules/pots";

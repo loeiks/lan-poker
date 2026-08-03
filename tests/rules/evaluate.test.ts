@@ -4,8 +4,8 @@ import type { Card } from "~/domain/Card";
 import { parseCard } from "~/domain/Card";
 import type { PlayerName } from "~/domain/Ids";
 import {
-  canEvaluate,
   Category,
+  canEvaluate,
   compare,
   evaluate,
   winnersAmong,

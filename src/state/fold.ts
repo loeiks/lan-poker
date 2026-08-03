@@ -2,23 +2,24 @@ import { Effect } from "effect";
 
 import * as Chips from "~/domain/Chips";
 import {
-  BoardFull,
-  DuplicateCard,
+  type BoardFull,
+  type DuplicateCard,
   IllegalAction,
+  type IllegalActionReason,
   InconsistentEventLog,
   InsufficientBalance,
   NotEnoughPlayers,
-  NotYourTurn,
+  type NotYourTurn,
   PlayerNotFound,
-  type IllegalActionReason,
 } from "~/domain/Errors";
-import * as E from "~/domain/Events";
+import type * as E from "~/domain/Events";
 import type { PlayerName, Seq } from "~/domain/Ids";
 import { initialSeq } from "~/domain/Ids";
 import type { HandState, PlayerState, TableState } from "~/domain/State";
 import { buttonPlayer, handInProgress } from "~/domain/State";
 import type { TableConfig } from "~/domain/TableConfig";
 import {
+  type ActionIntent,
   advanceStreet,
   applyAction,
   bettingExhausted,
@@ -28,7 +29,6 @@ import {
   onlyOneLeft,
   openRound,
   skipToShowdown,
-  type ActionIntent,
 } from "~/rules/betting";
 import { setBoardCard, setHoleCards } from "~/rules/cards";
 import { tickCooldown } from "~/rules/credit";

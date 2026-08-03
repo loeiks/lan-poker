@@ -1,9 +1,9 @@
 import * as Chips from "~/domain/Chips";
 import {
   IllegalAction,
-  NotYourTurn,
   type IllegalActionReason,
   type IntentError,
+  NotYourTurn,
 } from "~/domain/Errors";
 import * as E from "~/domain/Events";
 import type { HandId, PlayerName } from "~/domain/Ids";

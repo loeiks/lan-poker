@@ -8,11 +8,10 @@
     "moduleDetection": "force",
     "jsx": "react-jsx",
     "types": ["bun", "vite/client"],
-    "verbatimModuleSyntax": true,
+    "verbatimModuleSyntax": false,
     "noEmit": true,
     "allowImportingTsExtensions": true,
     "strict": true,
-    "exactOptionalPropertyTypes": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitOverride": true,
@@ -30,5 +29,6 @@
       }
     ]
   },
-  "include": ["src/**/*", "tests/**/*", "*.config.ts"]
+  "include": ["src/**/*", "tests/**/*", "server.ts", "*.config.ts"],
+  "exclude": ["node_modules", "dist"]
 }

@@ -5,14 +5,14 @@ import * as Chips from "~/domain/Chips";
 import {
   CreditUnavailable,
   IllegalAction,
+  type IllegalActionReason,
   InsufficientBalance,
+  type IntentError,
   NotAdmin,
   NotEligibleForPot,
   NotEnoughPlayers,
   PlayerNotFound,
   StaleSequence,
-  type IllegalActionReason,
-  type IntentError,
 } from "~/domain/Errors";
 import * as E from "~/domain/Events";
 import type { HandId, PlayerName, Seq } from "~/domain/Ids";
@@ -25,10 +25,10 @@ import {
   revealedBoard,
 } from "~/domain/State";
 import {
+  type ActionIntent,
   applyAction,
   emptyHand,
   postBlind,
-  type ActionIntent,
 } from "~/rules/betting";
 import {
   setBoardCard as checkBoardCard,
@@ -42,21 +42,21 @@ import {
   randomButtonIndex,
 } from "~/rules/positions";
 import {
+  type PotAward,
   buildPots,
   returnUncalled,
   splitPot,
-  type PotAward,
 } from "~/rules/pots";
 import { AppConfig } from "~/services/AppConfig";
 import { EventStore } from "~/services/EventStore";
 import {
+  type FoldError,
+  MIN_PLAYERS_PER_HAND,
   applyEvent,
   foldEvents,
   initialState,
-  MIN_PLAYERS_PER_HAND,
-  type FoldError,
 } from "~/state/fold";
-import { buildSnapshot, type TableSnapshot } from "~/state/snapshot";
+import { type TableSnapshot, buildSnapshot } from "~/state/snapshot";
 
 /**
  * Client intents → events (appended durably before notifying anyone) →

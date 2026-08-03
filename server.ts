@@ -1,16 +1,13 @@
-import { mkdirSync } from "node:fs";
-import { dirname } from "node:path";
-
 import { Cause, Effect, Exit, Layer, ManagedRuntime, Result } from "effect";
-
-import { normalizePlayerName, type PlayerName } from "~/domain/Ids";
+import { normalizePlayerName } from "~/domain/Ids";
+import type { PlayerName } from "~/domain/Ids";
 import type { ActionIntent } from "~/rules/betting";
 import {
   decodeClientMessage,
   encodeServerMessage,
   errorMessage,
-  type ClientMessage,
 } from "~/server/Messages";
+import type { ClientMessage } from "~/server/Messages";
 import { AppConfig } from "~/services/AppConfig";
 import { Broadcast } from "~/services/Broadcast";
 import { EventStore } from "~/services/EventStore";
@@ -20,21 +17,9 @@ import {
   type TableService,
 } from "~/services/Table";
 
-// Single Bun process serving HTTP and WebSocket. Handlers stay thin: decode,
-// run one Effect against the runtime built here, encode the result back.
-// No Effect logic inline in a callback.
-
-const DB_FILENAME = process.env["DB_FILENAME"] ?? "./data/table.sqlite";
+const DB_FILENAME = process.env.DB_FILENAME ?? "./db/table.sqlite";
 console.log(`lan-poker: using DB_FILENAME=${DB_FILENAME}`);
 
-// bun:sqlite fails with SQLITE_CANTOPEN rather than creating a missing
-// parent directory (e.g. a fresh checkout with no `data/` yet).
-mkdirSync(dirname(DB_FILENAME), { recursive: true });
-
-// Without these, an exception thrown outside an Effect boundary (a plain
-// throw in a sync callback, a rejected promise nobody awaited) kills the
-// whole Bun process silently -- every open WebSocket drops at once and the
-// only visible symptom is a downstream EPIPE in whatever's proxying to us.
 process.on("uncaughtException", (error) => {
   console.error("lan-poker: uncaughtException", error);
 });
@@ -70,7 +55,6 @@ type WireActionIntent = Extract<
   { readonly _tag: "Act" }
 >["intent"];
 
-/** The wire payload uses `_tag` (Schema.TaggedStruct); `rules/betting` uses `kind`. */
 const toActionIntent = (intent: WireActionIntent): ActionIntent => {
   switch (intent._tag) {
     case "check":
@@ -86,7 +70,6 @@ const toActionIntent = (intent: WireActionIntent): ActionIntent => {
   }
 };
 
-/** Every client message mapped onto the `Table` method it represents. */
 const runClientMessage = (
   table: TableService,
   player: PlayerName,
@@ -141,24 +124,27 @@ const runClientMessage = (
   }
 };
 
-const DIST_DIR = `${process.cwd()}/dist`;
+async function getHandler() {
+  try {
+    // @ts-expect-error — dist/server/server.js exists only after build
+    const mod = await import("./dist/server/server.js");
+    return (mod.default as { fetch: (req: Request) => Response }).fetch;
+  } catch {
+    return null;
+  }
+}
 
-const serveStatic = async (pathname: string): Promise<Response> => {
-  const requested = pathname === "/" ? "/index.html" : pathname;
-  const file = Bun.file(`${DIST_DIR}${requested}`);
-  if (await file.exists()) return new Response(file);
-  const index = Bun.file(`${DIST_DIR}/index.html`);
-  if (await index.exists()) return new Response(index);
-  return new Response("lan-poker: run `bun run build` first", { status: 404 });
-};
+const handler = await getHandler();
+
+const PORT = Number(process.env.PORT ?? 1818);
 
 const server = Bun.serve<SocketData>({
-  port: 1818,
+  port: PORT,
   fetch(req, bunServer) {
     const url = new URL(req.url);
     if (url.pathname === "/ws") {
       const player = playerNameFromRequest(req);
-      if (player === undefined) {
+      if (!player) {
         return new Response("missing or invalid ?name=", { status: 400 });
       }
       const upgraded = bunServer.upgrade(req, {
@@ -167,8 +153,10 @@ const server = Bun.serve<SocketData>({
       return upgraded ? undefined : new Response(null, { status: 400 });
     }
 
-    // No server-side routing, so fall back to index.html for the SPA.
-    return serveStatic(url.pathname);
+    if (handler) return handler(req);
+    return new Response("lan-poker: run `bun run build` first", {
+      status: 404,
+    });
   },
   websocket: {
     open(ws) {
@@ -178,9 +166,6 @@ const server = Bun.serve<SocketData>({
             const table = yield* Table;
             const broadcast = yield* Broadcast;
             yield* table.join(ws.data.player);
-            // Send the initial snapshot to this socket immediately so the
-            // connecting client never hangs at "Connecting…". broadcastAll
-            // follows to sync every other client.
             const id = yield* broadcast.connect(ws.data.player, (frame) =>
               ws.send(frame),
             );
@@ -190,8 +175,7 @@ const server = Bun.serve<SocketData>({
         )
         .then((exit) => {
           if (Exit.isFailure(exit)) {
-            const cause = exit.cause;
-            console.error("ws open failed", Cause.pretty(cause));
+            console.error("ws open failed", Cause.pretty(exit.cause));
           }
         });
     },

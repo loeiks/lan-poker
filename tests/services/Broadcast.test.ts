@@ -4,7 +4,7 @@ import { beforeEach, vi } from "vitest";
 
 import * as Chips from "~/domain/Chips";
 import type { PlayerName } from "~/domain/Ids";
-import { snapshotMessage } from "~/server/Messages";
+import type { snapshotMessage } from "~/server/Messages";
 import { AppConfig } from "~/services/AppConfig";
 import { Broadcast } from "~/services/Broadcast";
 import { EventStore } from "~/services/EventStore";

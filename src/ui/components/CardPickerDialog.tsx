@@ -1,5 +1,5 @@
 import type { Card, Suit } from "~/domain/Card";
-import { displayRank, isRedSuit, RANKS, SUITS } from "~/domain/Card";
+import { RANKS, SUITS, displayRank, isRedSuit } from "~/domain/Card";
 import { Button } from "~/ui/components/ui/button";
 import {
   Dialog,

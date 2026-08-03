@@ -2,9 +2,9 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { describe, expect, it } from "@effect/vitest";
 import { Database } from "bun:sqlite";
-import { Effect, Layer } from "effect";
+import { describe, expect, it } from "@effect/vitest";
+import { Effect, type Layer } from "effect";
 
 import * as Chips from "~/domain/Chips";
 import * as E from "~/domain/Events";

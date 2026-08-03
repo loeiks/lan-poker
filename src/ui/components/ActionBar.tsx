@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import * as Chips from "~/domain/Chips";
+import type * as Chips from "~/domain/Chips";
 import type { ActionIntent, LegalActions } from "~/rules/betting";
 import { Button } from "~/ui/components/ui/button";
 import { cn } from "~/ui/lib/utils";
