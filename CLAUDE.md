@@ -27,3 +27,4 @@ details when the documentation isn't enough.
 4. DONT add useless and/or unhelpful comments that is especially long, keep comments as short as possible and add them when **really** needed not just you wanted to add, never explain what code does, only add comments that provide info that couldn't be understood by looking at the code.
 5. When you need to check types use `bun run typecheck` shortly.
 6. Never use `as any` like TypeScript patterns, this kills the meaning of TS usage. Respect Effect errors and fix them.
+7. Use shadcn components when there is a component for what you need in shadcn, don't build new components unless its really needed.

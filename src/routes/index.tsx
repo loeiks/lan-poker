@@ -1,20 +1,37 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  useNavigate,
+  useRouter,
+} from "@tanstack/react-router";
+import { useEffect } from "react";
 
+import { LoadingState } from "~/ui/components/LoadingState";
 import { JoinScreen } from "~/ui/screens/JoinScreen";
 import { useTableContext } from "./__root";
 
 export const Route = createFileRoute("/")({
-  ssr: false,
   component: JoinRoute,
 });
 
 function JoinRoute() {
   const { name, table, join } = useTableContext();
   const navigate = useNavigate();
+  const router = useRouter();
+
+  useEffect(() => {
+    router.preloadRoute({ to: "/play" });
+  }, [router]);
+
+  useEffect(() => {
+    if (name && table.status === "open") navigate({ to: "/play" });
+  }, [name, table.status, navigate]);
 
   if (name && table.status === "open") {
-    navigate({ to: "/play" });
-    return null;
+    return <LoadingState message="Redirecting…" />;
+  }
+
+  if (name) {
+    return <LoadingState message="Connecting…" />;
   }
 
   return <JoinScreen onJoin={join} />;

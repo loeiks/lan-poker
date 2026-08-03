@@ -4,6 +4,7 @@ import {
   Outlet,
   Scripts,
 } from "@tanstack/react-router";
+import { getCookie } from "@tanstack/react-start/server";
 import type { ReactNode } from "react";
 import { createContext, useContext, useState } from "react";
 
@@ -14,14 +15,32 @@ import appCss from "~/ui/styles.css?url";
 
 const NAME_KEY = "lan-poker:name";
 
-function nameStorage(): Storage {
-  if (typeof window === "undefined") return null as unknown as Storage;
-  return import.meta.env.MODE === "development" ? sessionStorage : localStorage;
-}
-
 function storedName(): string | undefined {
   if (typeof window === "undefined") return undefined;
-  return nameStorage().getItem(NAME_KEY) ?? undefined;
+  const match = document.cookie.match(
+    new RegExp(`(?:^|; )${NAME_KEY}=([^;]*)`),
+  );
+  return match ? decodeURIComponent(match[1]) : undefined;
+}
+
+function syncCookie(name: string | undefined) {
+  if (typeof window === "undefined") return;
+  if ("cookieStore" in window) {
+    const cs = window.cookieStore as CookieStore;
+    if (name) {
+      cs.set({ name: NAME_KEY, value: name, path: "/" });
+    } else {
+      cs.delete({ name: NAME_KEY, path: "/" });
+    }
+    return;
+  }
+  if (name) {
+    // biome-ignore lint/suspicious/noDocumentCookie: fallback for browsers without Cookie Store API
+    document.cookie = `${NAME_KEY}=${encodeURIComponent(name)}; path=/; max-age=31536000`;
+  } else {
+    // biome-ignore lint/suspicious/noDocumentCookie: fallback for browsers without Cookie Store API
+    document.cookie = `${NAME_KEY}=; path=/; max-age=0`;
+  }
 }
 
 export interface TableContext {
@@ -40,6 +59,9 @@ export function useTableContext(): TableContext {
 }
 
 export const Route = createRootRoute({
+  loader: () => {
+    return { name: getCookie(NAME_KEY) };
+  },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -59,11 +81,14 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
-  const [name, setName] = useState<string | undefined>(storedName);
+  const { name: cookieName } = Route.useLoaderData();
+  const [name, setName] = useState<string | undefined>(
+    cookieName ?? storedName(),
+  );
   const table = useTable(name);
 
   const join = (n: string) => {
-    nameStorage().setItem(NAME_KEY, n);
+    syncCookie(n);
     setName(n);
   };
 
@@ -71,7 +96,7 @@ function RootComponent() {
     if (table.snapshot) {
       table.leave(table.snapshot.seq as Seq);
     }
-    nameStorage().removeItem(NAME_KEY);
+    syncCookie(undefined);
     setName(undefined);
   };
 
