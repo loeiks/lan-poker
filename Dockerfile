@@ -22,7 +22,7 @@ COPY --from=build /app/src ./src
 COPY --from=build /app/drizzle ./drizzle
 COPY --from=build /app/tsconfig.json ./tsconfig.json
 
-RUN bun install --frozen-lockfile --production
+RUN bun install --frozen-lockfile --production --ignore-scripts
 
 RUN mkdir -p /app/db
 
@@ -30,4 +30,4 @@ ENV DB_FILENAME=/app/db/table.sqlite
 ENV PORT=1818
 EXPOSE 1818
 
-CMD ["sh", "-c", "bunx drizzle-kit migrate && bun run server.ts"]
+CMD ["bun", "run", "server.ts"]
