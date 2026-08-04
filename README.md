@@ -19,8 +19,8 @@ A real-time poker table app for LAN parties. Cards stay physical — the app rep
 ## Quick Start (Docker)
 
 ```bash
-docker build -t lan-poker .
-docker run -p 1818:1818 -v lan-poker-data:/app/data lan-poker
+docker pull loeiks/lan-poker:latest
+docker run -p 1818:1818 -v lan-poker-data:/app/db loeiks/lan-poker:latest
 ```
 
 Open `http://<server-ip>:1818` on any phone or laptop on the same network. The table is playable on defaults.
@@ -28,14 +28,14 @@ Open `http://<server-ip>:1818` on any phone or laptop on the same network. The t
 Customize with environment variables:
 
 ```bash
-docker run -p 1818:1818 -v lan-poker-data:/app/data \
+docker run -p 1818:1818 -v lan-poker-data:/app/db \
   -e TABLE_NAME="Friday Night" \
   -e TABLE_MIN=20 \
   -e TABLE_MODE=BURNOUT_CREDIT \
   -e STARTING_BALANCE=1400 \
-  -e ADMIN_NAME=ali \
-  -e DB_FILENAME=/app/data/friday.sqlite \
-  lan-poker
+  -e ADMIN_NAME=enes \
+  -e DB_FILENAME=/app/db/poker.sqlite \
+  loeiks/lan-poker:latest
 ```
 
 | Variable           | Default                     | Example                | Description                                   |
@@ -44,9 +44,9 @@ docker run -p 1818:1818 -v lan-poker-data:/app/data \
 | `TABLE_MIN`        | `10`                        | `20`                   | Minimum bet                                   |
 | `TABLE_MODE`       | `BURNOUT_CREDIT`            | `LOSS_BONUS`           | `BURNOUT_CREDIT`, `LOSS_BONUS`, or `DISABLED` |
 | `STARTING_BALANCE` | `70 × TABLE_MIN`            | `1400`                 | Starting chips per player                     |
-| `ADMIN_NAME`       | _(none)_                    | `ali`                  | Player that gets admin controls               |
-| `DB_FILENAME`      | `./data/table.sqlite`       | `/app/data/fri.sqlite` | SQLite database path                          |
+| `ADMIN_NAME`       | _(none)_                    | `enes`                 | Player that gets admin controls               |
+| `DB_FILENAME`      | `/app/db/table.sqlite`      | `/app/db/poker.sqlite` | SQLite database path                          |
 
 All variables are optional. The table is fully playable on defaults.
 
-For design decisions (credit formulas, pot rules, event sourcing, identity model, etc.), see [`docs/DECISIONS.md`](docs/DECISIONS.md). For local development, see [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md).
+Have fun!
